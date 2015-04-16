@@ -1,0 +1,38 @@
+﻿@using System
+@using OnlineStore.Controllers
+@using OnlineStore.Models
+@model OnlineStore.Controllers.ReccomendationController.RecomendationModel
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<h2>Таблица схожести</h2>
+<table class="table table-bordered">
+    <tr>
+        <th></th>
+        @foreach (Users user in Model.Users)
+        {
+            <th>@user.Name.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries)[0]</th>
+        }
+    </tr>
+    @foreach (Users user in Model.Users)
+    {
+        <tr>
+            <th>@user.Name.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries)[0]</th>
+            @foreach (Users user2 in Model.Users)
+            {
+                foreach (ReccomendationController.SimilarUsers likness in Model.Liknesses)
+                {
+                    if (likness.First == user && likness.Second == user2)
+                    {
+                        <td>
+                            @Math.Round(likness.SimilarCoef, 4)
+                        </td>
+                    }
+                }
+            }
+        </tr>
+    }
+</table>
