@@ -14,8 +14,8 @@ namespace OnlineStore.Controllers
         public ActionResult Index()
         {RecomendationModel model = new RecomendationModel();
             model.Users = Entities.Users.ToList();
-            model.Liknesses = GetListOfSimilarUsers();
-            model.PersonalRecomendation = GetRecomendation(model.Liknesses);
+            model.SimilarUserses = GetListOfSimilarUsers();
+            model.recomendation = GetRecomendation(model.SimilarUserses);
 
             return View(model);
         }
@@ -53,39 +53,38 @@ namespace OnlineStore.Controllers
 
         public List<Phones> GetRecomendation(List<SimilarUsers> list)
         {
-            List<Phones> personal = new List<Phones>();
+            List<Phones> myPhones = new List<Phones>();
             if (User.Identity.IsAuthenticated)
             {
                 Users user = Entities.Users.SingleOrDefault(x => x.Name == User.Identity.Name);
                 if (user != null)
                 {
-                    List<SimilarUsers> usersLikeMe = new List<SimilarUsers>();
+                    List<SimilarUsers> userList = new List<SimilarUsers>();
                     double maxSimilarUsers = 0;
                     foreach (SimilarUsers similarUsers in list.Where(x => x.First == user))
                     {
-                        usersLikeMe.Add(similarUsers);
+                        userList.Add(similarUsers);
                         if (similarUsers.SimilarCoef > maxSimilarUsers)
                         {
                             maxSimilarUsers = similarUsers.SimilarCoef;
                         }
                     }
 
-                    usersLikeMe =
-                        usersLikeMe.OrderByDescending(x => x.SimilarCoef)
-                            .Where(x => (x.SimilarCoef >= (0.75 * maxSimilarUsers)))
+                    userList = userList.OrderByDescending(x => x.SimilarCoef)
+                            .Where(x => (x.SimilarCoef >= (0.8 * maxSimilarUsers)))
                             .ToList();
 
-                    List<Phones> userApps = (from scores in user.Scores select scores.Phones).ToList();
+                    List<Phones> phones = (from scores in user.Scores select scores.Phones).ToList();
 
-                    foreach (SimilarUsers similarUsers in usersLikeMe)
+                    foreach (SimilarUsers similarUsers in userList)
                     {
-                        List<Phones> otherUserApps = (from scores in similarUsers.Second.Scores where scores.Result > 4 select scores.Phones).ToList();
+                        List<Phones> otherPhones = (from scores in similarUsers.Second.Scores where scores.Result > 4 select scores.Phones).ToList();
 
-                        personal.AddRange(from apps in otherUserApps where !userApps.Contains(apps) select apps);
+                        myPhones.AddRange(from phone in otherPhones where !phones.Contains(phone) select phone);
                     }
                 }
             }
-            return personal;
+            return myPhones;
         }
 
         public class SimilarUsers
@@ -97,9 +96,9 @@ namespace OnlineStore.Controllers
 
         public class RecomendationModel
         {
-            public List<SimilarUsers> Liknesses { get; set; }
+            public List<SimilarUsers> SimilarUserses { get; set; }
             public List<Users> Users { get; set; }
-            public List<Phones> PersonalRecomendation { get; set; }
+            public List<Phones> recomendation { get; set; }
         }
 
     }

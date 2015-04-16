@@ -8,7 +8,17 @@
 
 <h2>Index</h2>
 
-<h2>Таблица схожести</h2>
+@if (User.Identity.IsAuthenticated)
+{
+    <h2>Персональные рекомендации</h2>
+    <ul>
+        @foreach (var reccomendation in Model.recomendation)
+        {
+            <li>@reccomendation.Title <i>(@reccomendation.Vendors.Title)</i></li>
+        }
+    </ul>
+}
+
 <table class="table table-bordered">
     <tr>
         <th></th>
@@ -23,7 +33,7 @@
             <th>@user.Name.Split(new[] { '@' }, StringSplitOptions.RemoveEmptyEntries)[0]</th>
             @foreach (Users user2 in Model.Users)
             {
-                foreach (ReccomendationController.SimilarUsers likness in Model.Liknesses)
+                foreach (ReccomendationController.SimilarUsers likness in Model.SimilarUserses)
                 {
                     if (likness.First == user && likness.Second == user2)
                     {
